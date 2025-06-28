@@ -20,10 +20,10 @@
   - [Respostas ao Desafio](#respostas-ao-desafio)
   - [Visão Geral da Solução](#visão-geral-da-solução)
   - [Arquitetura](#arquitetura)
-    - [Design Simplificado da API](#design-simplificado-da-api)
+    - [Design Simplificado do Código](#design-simplificado-do-código)
   - [Pré-requisitos](#pré-requisitos)
   - [Instalação e Execução](#instalação-e-execução)
-  - [Uso da API para Resolver o Desafio](#uso-da-api-para-resolver-o-desafio)
+  - [Como Utilizar o Código para Resolver o Desafio](#como-utilizar-o-código-para-resolver-o-desafio)
   - [Estrutura do Projeto](#estrutura-do-projeto)
   - [Armazenamento Persistente](#armazenamento-persistente-seção-opcional-do-desafio)
   - [Como Executar o Pipeline Completo](#como-executar-o-pipeline-completo)
@@ -52,7 +52,7 @@ Esta solução implementa uma pipeline completa de engenharia de dados para proc
 
 **Diferenciais:**
 
-- **API simplificada** e intuitiva para processamento de logs
+- **Interface simplificada** e intuitiva para processamento de logs
 - Processamento distribuído e escalável com **Apache Spark**
 - Análises visuais e interativas com **Jupyter Notebook**
 - Arquitetura de medalhas (Bronze → Silver → Gold) para organização dos dados
@@ -81,16 +81,9 @@ O projeto implementa a arquitetura medalhão para organizar o processamento dos 
 - Geração das respostas às perguntas do desafio
 - Visualizações e insights em notebooks Jupyter
 
-### Design Simplificado da API
+### Design Simplificado do Código
 
-A API foi projetada para resolver o desafio de forma:
-
-**Estrutural:**
-
-- Baseada em funções puras (não classes)
-- De estrutura mais plana e direta
-- Fácil de usar e intuitiva
-- Altamente testável
+O código foi projetado para resolver o desafio de forma:
 
 **Componentes principais:**
 
@@ -151,9 +144,9 @@ Para executar a solução do desafio você precisará de:
    
    Abra no Jupyter Notebook o arquivo `notebook/explore.ipynb` para visualizar as respostas às questões do desafio com visualizações.
 
-## Uso da API para Resolver o Desafio
+## Como Utilizar o Código para Resolver o Desafio
 
-A API foi projetada para responder diretamente às perguntas do desafio. Veja como usá-la:
+O código foi projetado para responder diretamente às perguntas do desafio. Veja como usá-lo:
 
 ```python
 # Pipeline completo para processar logs e responder às perguntas
@@ -207,7 +200,7 @@ python src/log_analyzer/main.py --no-db
 O projeto inclui dois notebooks Jupyter para análise dos logs:
 
 - `notebook/explore.ipynb` - **Responde às perguntas do desafio** com visualizações
-- `notebook/01_run_pipeline.ipynb` - Demonstração da API e validação dos resultados
+- `notebook/01_run_pipeline.ipynb` - Demonstração do uso do código e validação dos resultados
 
 ## Estrutura do Projeto
 
