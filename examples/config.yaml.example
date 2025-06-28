@@ -1,0 +1,34 @@
+# Exemplo de arquivo de configuração para o log_analyzer
+# Renomeie para config.yaml para usá-lo
+
+spark:
+  app_name: "LogAnalyzerCustom"
+  master: "local[4]"
+  executor_memory: "4g"
+  driver_memory: "2g"
+  executor_cores: "4"
+
+paths:
+  # Você pode personalizar os caminhos para dados e logs
+  # data_root: "/custom/data/path"
+  # logs_root: "/custom/logs/path"
+
+log_formats:
+  # Você pode adicionar novos formatos de log personalizados
+  nginx:
+    pattern: '^(\S+) - (\S+) \[(.*?)\] "(\S+) (\S+) (\S+)" (\d+) (\d+) "([^"]*)" "([^"]*)"'
+    timestamp_format: "dd/MMM/yyyy:HH:mm:ss Z"
+    columns: ["ip", "user", "timestamp_str", "method", "url", "protocol", "status", "size", "referer", "user_agent"]
+
+analysis:
+  top_n_items: 15
+  date_format: "%d/%b/%Y:%H:%M:%S %z"
+  time_window_minutes: 60
+  error_threshold: 0.05
+
+database:
+  # Configurações de banco de dados
+  # silver_db_url: "jdbc:postgresql://custom-db:5432/mydatabase"
+  # silver_db_user: "custom_user"
+  # silver_db_password: "custom_password"
+  # silver_db_driver: "org.postgresql.Driver"

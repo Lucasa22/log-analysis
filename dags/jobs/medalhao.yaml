@@ -1,0 +1,16 @@
+# medalhao.yml (versão atualizada)
+dag_id: log_analyzer_simplified_pipeline
+schedule_interval: null
+description: Pipeline ETL simplificado usando a nova API do log_analyzer.
+start_date: 2025-06-27
+tags:
+  - log-analyzer
+  - etl
+  - simplified-api
+owner: airflow
+pipeline_params:
+  # Parâmetros unificados para o pipeline simplificado
+  input_path: "{{ var.json.log_analyzer_paths.input_path }}"
+  output_path: "{{ var.json.log_analyzer_paths.output_base }}"
+  log_format: "common"
+  save_to_db: false

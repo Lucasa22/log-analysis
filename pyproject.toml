@@ -1,0 +1,88 @@
+# pyproject.toml
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "log_analyzer"
+version = "1.0.0"
+description = "Pipeline de análise de logs com Spark e Airflow."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+    {name = "Log Analysis Challenge Team", email = "team@example.com"} # Updated author
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    # A linha "License :: OSI Approved :: MIT License" foi removida daqui.
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    "pyspark==3.5.0",
+    "pyyaml>=6.0",
+    "click>=8.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/log-analysis"
+
+[project.scripts]
+log-analyzer = "log_analyzer.cli:medalhao"
+
+[project.optional-dependencies]
+airflow = [
+    "apache-airflow==2.8.2",
+    "apache-airflow-providers-postgres>=5.6.0",
+    "psycopg2-binary>=2.9.0"
+]
+dev = [
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.3.1",
+    "black>=23.11.0",
+    "isort>=5.12.0",
+    "flake8>=6.1.0",
+    "mypy>=1.7.1",
+    "pylint>=3.0.2",
+    "ruff>=0.1.6",
+    "pyupgrade>=3.15.0",
+    "jupyter>=1.0.0",
+    "jupyterlab>=4.0.9",
+    "jupyter-black>=0.3.4",
+    "nbqa>=1.7.1",
+    "rich>=13.6.0",
+    "types-pyyaml>=6.0.12.12",
+    "pandas-stubs>=2.1.1.230928",
+    "pre-commit>=3.5.0"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+# include = ["log_analyzer*"] # You can be more explicit if needed
+# exclude = ["tests*"] # Usually tests are not part of the installable package
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+# Custom tool sections like [log_formats] are fine and not parsed by build tools.
+[log_formats.apache_common]
+pattern = "^(\\S+) .*? \\[([\\w:/]+\\s[+\\-]\\d{4})\\] \\\"(\\S+)\\s(\\S+)\\s(\\S+)\\\"\\s(\\d{3})\\s(\\d+)"
+timestamp_format = "dd/MMM/yyyy:HH:mm:ss Z"
+columns = ["ip", "timestamp_str", "method", "url", "protocol", "status", "size"]
+
+[log_formats.apache_combined]
+pattern = "^(\\S+) .*? \\[([\\w:/]+\\s[+\\-]\\d{4})\\] \\\"(\\S+)\\s(\\S+)\\s(\\S+)\\\"\\s(\\d{3})\\s(\\d+)\\s\\\"([^\\\"]*)\\\"\\s\\\"([^\\\"]*)\\\""
+timestamp_format = "dd/MMM/yyyy:HH:mm:ss Z"
+columns = ["ip", "timestamp_str", "method", "url", "protocol", "status", "size", "referer", "user_agent"]

@@ -1,0 +1,40 @@
+version: '3.8'
+
+# Este é um arquivo de exemplo para sobrescrever configurações no docker-compose.yml
+# Copie este arquivo para docker-compose.override.yml e modifique conforme necessário
+
+services:
+  # Exemplo: Modificar a configuração do PostgreSQL
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD=my-secure-password  # Sobrescreve a senha padrão
+    volumes:
+      # Adiciona um volume de backup
+      - ./backups:/var/lib/postgresql/backup
+
+  # Exemplo: Modificar o Jupyter para ter mais recursos
+  jupyter:
+    environment:
+      - JUPYTER_TOKEN=my-secure-token  # Token personalizado
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+
+  # Exemplo: Modificar o número de cores do worker Spark
+  spark-worker:
+    environment:
+      - SPARK_WORKER_CORES=4  # Mais cores para processamento
+      - SPARK_WORKER_MEMORY=6G  # Mais memória
+      
+  # Você pode adicionar serviços adicionais também
+  # Exemplo: Adicionar um visualizador de dados
+  metabase:
+    image: metabase/metabase:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - log_analyzer_net
+    depends_on:
+      - postgres

@@ -1,0 +1,148 @@
+networks:
+  log_analyzer_net:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - log_analyzer_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: airflow_webserver
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/log-analysis/src
+      - ./data:/opt/airflow/log-analysis/data
+      - ./notebook:/opt/airflow/log-analysis/notebook
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - PYTHONPATH=/opt/airflow/log-analysis
+    networks:
+      - log_analyzer_net
+    command: ["airflow", "webserver"]
+
+  spark-master:
+    image: bitnami/spark:3
+    container_name: spark_master
+    ports:
+      - "8081:8080" # UI do Spark
+      - "7077:7077"
+      - "4040:4040" # Spark Application UI
+    volumes:
+      # Monta o código do projeto em uma pasta segura
+      - ./:/opt/bitnami/spark/project
+      # --- CORREÇÃO ---
+      # Monta APENAS o arquivo JAR, sem substituir a pasta inteira
+      - ./jars/postgresql-42.7.3.jar:/opt/bitnami/spark/jars/postgresql-42.7.3.jar
+      # Monta a pasta de dados
+      - ./data:/opt/bitnami/spark/data
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - PYTHONPATH=/opt/bitnami/spark/project
+    networks:
+      - log_analyzer_net
+
+  # 4. Serviço Worker do Spark (CORRIGIDO)
+  spark-worker:
+    image: bitnami/spark:3
+    container_name: spark_worker
+    depends_on:
+      - spark-master
+    volumes:
+      # Monta o código do projeto
+      - ./:/opt/bitnami/spark/project
+      - ./jars/postgresql-42.7.3.jar:/opt/bitnami/spark/jars/postgresql-42.7.3.jar
+      - ./data:/opt/bitnami/spark/data 
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_WORKER_CORES=2
+      - PYTHONPATH=/opt/bitnami/spark/project
+    networks:
+      - log_analyzer_net
+
+  airflow-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: airflow_init_runner
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/log-analysis/src
+      - ./data:/opt/airflow/log-analysis/data
+    environment:
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - PYTHONPATH=/opt/airflow/log-analysis
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        echo "Inicializando o banco de dados do Airflow..."
+        airflow db init && \
+        echo "Criando usuário administrador..." && \
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com && \
+        echo "Instalando o log_analyzer no ambiente..."
+        pip install -e /opt/airflow/log-analysis
+    networks:
+      - log_analyzer_net
+      
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jupyter_notebook
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./:/opt/airflow/log-analysis
+    environment:
+      - JUPYTER_TOKEN=easy
+    command: >
+      bash -c "pip install jupyter notebook && jupyter notebook 
+      --notebook-dir=/opt/airflow/log-analysis/notebooks 
+      --ip=0.0.0.0 --port=8888 --no-browser --allow-root 
+      --NotebookApp.token=easy"
+    networks:
+      - log_analyzer_net
+
+volumes:
+  postgres_data:
+
